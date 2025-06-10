@@ -1,0 +1,22 @@
+// :root 选择器通常用于定义全局 CSS 变量（也称为自定义属性）,整个文档中被引用和使用，可以通过 var() 函数来引用这些变量
+:root {
+  // 基础颜色
+  --text-color: #000000;
+  --text-color-secondary: #bbbfc4;
+  --sidebar-bg-color:#f0f4f9;
+  --bg-color: #ffffff;
+  --border-color: #c5c5c5;
+
+  // 代码相关的颜色和字体
+  --code-font-family: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+  --code-lang-text: #000000;
+  --code-block-bg: #fcfcfc;
+  --code-header-bg: #f3f4f6;
+  --code-border: #ebebeb;
+  --code-text: #383a42; /* 添加默认代码文本颜色 - 接近黑色 */
+  --code-header-button-hover-bg: #e5e6e8;
+}
+
+
+
+
