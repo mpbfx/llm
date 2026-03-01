@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Document, Loading, Sunny, ArrowDown } from '@element-plus/icons-vue'
-import { computed, ref, onMounted, onUnmounted } from "vue";
+import { computed, ref, onMounted, onUnmounted, nextTick, watch } from "vue";
 import { rederMarkdown } from "@/utils/markdown";
 import copyIcon from '@/assets/photo/复制.png'
 
@@ -12,6 +12,17 @@ const props = defineProps({
         default: " "
     }
 })
+const emit = defineEmits<{
+    (event: 'height-change', height: number): void
+}>()
+const rootRef = ref<HTMLElement | null>(null)
+let resizeObserver: ResizeObserver | null = null
+
+const emitHeight = () => {
+    const el = rootRef.value
+    if (!el) return
+    emit('height-change', el.offsetHeight)
+}
 
 //深度思考部分展开折叠
 const isReasoningExpanded = ref(true)
@@ -98,13 +109,34 @@ onMounted(() => {
             copyBtn?.removeEventListener('click', handleCodeCopy)
         })
     })
+
+    // 观察当前消息节点高度变化，回传给父组件更新虚拟列表高度缓存
+    resizeObserver = new ResizeObserver(() => {
+        emitHeight()
+    })
+    if (rootRef.value) {
+        resizeObserver.observe(rootRef.value)
+    }
+    nextTick(() => emitHeight())
+})
+
+watch(
+    () => [props.message.content, props.message.reasoning_content, props.message.loading],
+    () => {
+        nextTick(() => emitHeight())
+    },
+)
+
+onUnmounted(() => {
+    resizeObserver?.disconnect()
+    resizeObserver = null
 })
 
 </script>
 
 <template>
     <!-- 动态绑定：当message.role==='user'时，类名为is-mine ，{}里面为对象-->
-    <div class="message-item" :class="{ 'is-mine': message.role === 'user' }">
+    <div class="message-item" ref="rootRef" :class="{ 'is-mine': message.role === 'user' }">
         <!-- 文件预览区域  因为message.files是数组所以还要length>0-->
         <div class="files-container" v-if="message.files && message.files.length > 0">
             <div class="files-item" v-for="file in message.files" :key="file.url">

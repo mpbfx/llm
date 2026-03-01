@@ -1,12 +1,14 @@
 import { ref} from 'vue'
 import { defineStore } from 'pinia'//定义一个store
 
+const DEFAULT_DASHSCOPE_MODEL = 'qwen-plus'
+
 //创建叫useSettingStore的pinia仓库  llm-setting:这个store的id，标识这个 Store
 export const useSettingStore = defineStore('llm-setting', 
   () => {
   // 创建响应式对象settings
   const settings = ref({
-    model: 'deepseek-ai/DeepSeek-R1', 
+    model: DEFAULT_DASHSCOPE_MODEL, 
     apiKey: '', 
     stream: true,
     maxTokens: 4096, 
@@ -26,39 +28,28 @@ export const useSettingStore = defineStore('llm-setting',
 //设置里model的下拉菜单:创建 普通的 modelOptions对象，不在pinia仓库里
 export const modelOptions = [
   {
-    label: 'DeepSeek-R1',
-    value: 'deepseek-ai/DeepSeek-R1',
-    maxTokens: 16384,
-  },
-  {
-    label: 'DeepSeek-V3',
-    value: 'deepseek-ai/DeepSeek-V3',
-    maxTokens: 4096,
-  },
-  {
-    label: 'DeepSeek-V2.5',
-    value: 'deepseek-ai/DeepSeek-V2.5',
-    maxTokens: 4096,
-  },
-  {
-    label: 'Qwen2.5-72B-Instruct-128K',
-    value: 'Qwen/Qwen2.5-72B-Instruct-128K',
-    maxTokens: 4096,
-  },
-  {
-    label: 'QwQ-32B-Preview',
-    value: 'Qwen/QwQ-32B-Preview',
+    label: 'Qwen-Plus',
+    value: 'qwen-plus',
     maxTokens: 8192,
   },
   {
-    label: 'glm-4-9b-chat',
-    value: 'THUDM/glm-4-9b-chat',
+    label: 'Qwen-Turbo',
+    value: 'qwen-turbo',
     maxTokens: 4096,
   },
   {
-    label: 'glm-4-9b-chat(Pro)',
-    value: 'Pro/THUDM/glm-4-9b-chat',
-    maxTokens: 4096,
+    label: 'Qwen-Max',
+    value: 'qwen-max',
+    maxTokens: 8192,
+  },
+  {
+    label: 'Qwen-Long',
+    value: 'qwen-long',
+    maxTokens: 32000,
+  },
+  {
+    label: 'Qwen3-Coder-Plus',
+    value: 'qwen3-coder-plus',
+    maxTokens: 8192,
   },
 ]
-

@@ -1,7 +1,8 @@
 //网络请求
-import { useSettingStore } from "@/stores/settings.ts";
+import { modelOptions, useSettingStore } from "@/stores/settings.ts";
 
-const API_BASE_URL = 'https://api.siliconflow.cn/v1'
+const API_BASE_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1'
+const DEFAULT_MODEL = 'qwen-plus'
 
 // 定义消息类型
 interface sendMessage {
@@ -13,15 +14,21 @@ interface sendMessage {
 export const createChatCompletion = async (messages:sendMessage[]) => {
     //导入设置仓库
     const settingStore = useSettingStore()
+    const hasModel = modelOptions.some((option)=>option.value===settingStore.settings.model)
+    const selectedModel = hasModel ? settingStore.settings.model : DEFAULT_MODEL
+
+    if(!settingStore.settings.apiKey.trim()){
+        throw new Error('请先在设置中填写 DashScope API Key')
+    }
+
     //发送给api的参数
     const payload = {
-        model: settingStore.settings.model,
+        model: selectedModel,
         messages,
         stream: settingStore.settings.stream,
         max_tokens: settingStore.settings.maxTokens,
         temperature: settingStore.settings.temperature,
         top_p: settingStore.settings.topP,
-        top_k: settingStore.settings.topK,
     }
     //配置网络请求选项
     const options = {

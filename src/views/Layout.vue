@@ -3,12 +3,13 @@ import Sidebar from "@/components/Sidebar.vue"
 import ChatMessage from "@/components/ChatMessage.vue"
 import ChatInput from "@/components/ChatInput.vue"
 import SettingsPanel from "@/components/SettingsPanel.vue"
-import { ref, computed, watch, nextTick, onMounted } from "vue";
+import { ref, computed, nextTick, onMounted } from "vue";
 import { useChatStore } from "@/stores/chat.ts"
 import { messageHandle } from "@/utils/messageHandle.ts"
 import { createChatCompletion } from "@/utils/api.ts"
 import { useSettingStore } from "@/stores/settings"
 import type { Ref } from 'vue';
+import { useVirtualChatList } from "@/components/virtual-list/useVirtualChatList";
 
 
 //定义仓库chatStore
@@ -64,33 +65,38 @@ const handleSend = async (messageContent: { text: string; files: File[] }) => {
 
 // 定义消息容器。后面会ref
 const messagesContainer: Ref<HTMLElement | null> = ref(null)
-// 监听消息变化，滚动到底部
-watch(
-    currentMessages,
-    () => {
-        //nextTick:确保元素渲染完成再实行操作
-        nextTick(() => {
-            if (messagesContainer.value) {
-                //元素滚动条当前位置=元素高度，即最底部
-                messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
-            }
-        })
-    },
-    { deep: true },//深度监听，修改数组内部内容也会触发
-)
+
+const {
+    onScroll,
+    visibleMessages,
+    paddingTop,
+    paddingBottom,
+    setItemHeight,
+    scrollToBottom,
+} = useVirtualChatList(messagesContainer, currentMessages, {
+    estimateHeight: 110,
+    overscan: 3,
+    followBottomThreshold: 80,
+})
 
 onMounted(() => {
     // 每次页面刷新时，将消息容器滚动到底部
     nextTick(() => {
-        if (messagesContainer.value) {
-            messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
-        }
+        scrollToBottom()
     })
     // 当没有对话时，默认新建一个对话
     if (chatStore.conversations.length === 0) {
         chatStore.createConversation()
     }
 })
+
+const handleItemHeightChange = (id: number, height: number) => {
+    setItemHeight(id, height)
+}
+
+const handleMessagesScroll = () => {
+    onScroll()
+}
 
 </script>
 
@@ -126,11 +132,13 @@ onMounted(() => {
                 </div>
             </div>
             <!-- 消息容器，显示对话消息 -->
-            <div class="messages-container" ref="messagesContainer">
+            <div class="messages-container" ref="messagesContainer" @scroll="handleMessagesScroll">
                 <!-- 有对话时的界面 -->
-                <template class="chat-message" v-if="currentMessages.length > 0">
-                    <ChatMessage v-for="message in currentMessages" :key="message.id" :message="message" />
-                </template>
+                <div class="chat-message" v-if="currentMessages.length > 0"
+                    :style="{ paddingTop: `${paddingTop}px`, paddingBottom: `${paddingBottom}px` }">
+                    <ChatMessage v-for="message in visibleMessages" :key="message.id" :message="message"
+                        @height-change="handleItemHeightChange(message.id, $event)" />
+                </div>
                 <!-- 没有对话时的界面 -->
                 <div v-else class="chat-message-begin">
                     <div class="greet">
@@ -227,6 +235,10 @@ onMounted(() => {
             max-width: 900px;
             margin: 0 auto;//水平居中
             width: 100%;
+
+            .chat-message {
+                width: 100%;
+            }
 
             .chat-message-begin {
 

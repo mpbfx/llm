@@ -78,7 +78,7 @@ defineExpose({
           </el-tooltip>
         </div>
         <!-- target="_blank" 转到一个新页面，而不是直接在旧页面跳转-->
-        <a href="https://cloud.siliconflow.cn/account/ak" target="_blank">获取 API Key</a>
+        <a href="https://bailian.console.aliyun.com/" target="_blank">获取 API Key</a>
       </div>
       <!-- show-password：是否显示切换密码图标 -->
       <el-input placeholder="请输入 API Key" type="password" show-password v-model="settingStore.settings.apiKey" />
